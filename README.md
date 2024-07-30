@@ -1,4 +1,4 @@
-# osu-api-project
+# scorepost-gen
 
 A project to fetch and display osu! player scores.
 
