@@ -1,5 +1,6 @@
 const { v1, auth, tools } = require("osu-api-extended");
 const prompt = require("prompt-sync")();
+require("dotenv").config();
 
 const main = async () => {
   const ora = (await import("ora")).default;
