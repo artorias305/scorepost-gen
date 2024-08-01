@@ -1,6 +1,6 @@
 const { v1, auth, tools } = require("osu-api-extended");
-const prompt = require("prompt-sync")();
 require("dotenv").config();
+const { select, text } = require("@clack/prompts");
 
 const main = async () => {
   const ora = (await import("ora")).default;
@@ -16,16 +16,19 @@ const main = async () => {
     await auth.login(CLIENT_ID, CLIENT_SECRET, SCOPE_LIST);
     spinner.succeed("Logged in successfully!");
 
-    const userId = prompt("Enter the player Id or username: ");
-    const sort = prompt(
-      "Do you want to sort by recent or best? "
-    ).toLowerCase();
-    const validSorts = ["recent", "best"];
-
-    if (!validSorts.includes(sort)) {
-      console.log("Invalid sort option. Please enter 'recent' or 'best'.");
-      return;
-    }
+    const userId = await text({
+      message: "Enter the player ID or username",
+      validate(value) {
+        if (value.length === 0) return `Please enter a valid ID or username`;
+      },
+    });
+    const sort = await select({
+      message: "Do you want to sort by:",
+      options: [
+        { value: "recent", label: "Recent" },
+        { value: "best", label: "Best" },
+      ],
+    });
 
     spinner.start("Fetching scores...");
     const data = await v1.user.scores.category(userId, sort, "osu", "id", 1);
