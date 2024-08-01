@@ -1,20 +1,21 @@
 const { v1, auth, tools } = require("osu-api-extended");
 require("dotenv").config();
-const { select, text } = require("@clack/prompts");
+const { select, text, intro, outro, spinner } = require("@clack/prompts");
 
 const main = async () => {
-  const ora = (await import("ora")).default;
   const API_KEY = process.env.API_KEY;
   const CLIENT_ID = process.env.CLIENT_ID;
   const CLIENT_SECRET = process.env.CLIENT_SECRET;
   const SCOPE_LIST = ["public"];
 
   auth.set_v1(API_KEY);
-  const spinner = ora("Logging in...").start();
+  intro(`Welcome to Artorias's scorepost generator!`);
+  const s = spinner();
+  s.start(`Loggin in...`);
 
   try {
     await auth.login(CLIENT_ID, CLIENT_SECRET, SCOPE_LIST);
-    spinner.succeed("Logged in successfully!");
+    s.stop(`Logged in successfully.`);
 
     const userId = await text({
       message: "Enter the player ID or username",
@@ -30,9 +31,9 @@ const main = async () => {
       ],
     });
 
-    spinner.start("Fetching scores...");
+    s.start("Fetching scores...");
     const data = await v1.user.scores.category(userId, sort, "osu", "id", 1);
-    spinner.stop();
+    s.stop();
 
     if (!data || data.length === 0) {
       console.log("No scores found.");
@@ -41,12 +42,12 @@ const main = async () => {
 
     const score = data[0];
 
-    spinner.start("Fetching player details...");
+    s.start("Fetching player and map details...");
     const player = await v1.user.details(userId);
     const map = await v1.beatmap.diff(score.beatmap);
-    spinner.stop();
+    s.stop();
 
-    spinner.start("Calculating PP if FC...");
+    s.start("Calculating PP if FC...");
     const ppFC = await tools.pp.calculate(
       score.beatmap,
       score.mods.id,
@@ -54,7 +55,7 @@ const main = async () => {
       0,
       score.accuracy
     );
-    spinner.stop();
+    s.stop();
 
     const starRating = await tools.pp.calculate(
       score.beatmap,
@@ -64,14 +65,18 @@ const main = async () => {
       score.accuracy
     );
 
-    console.log(
+    outro(
       `${player.name} | ${map.metadata.artist.original} - ${map.metadata.title.original} [${map.difficulties[0].diff}] +${score.mods.name} ` +
         `(${map.metadata.creator.name}, ${starRating.stats.star.pure}*) ${score.accuracy}% ` +
-        `${score.combo.max}/${map.difficulties[0].stats.combo}x ${score.hits["0"]}xMiss | ` +
-        `${Math.round(score.pp)}pp | ${Math.round(ppFC.pp.current)}pp if FC`
+        `${score.combo.max}/${map.difficulties[0].stats.combo}x ` +
+        `${score.hits["0"] === 0 ? "FC" : `${score.hits["0"]}xMiss`} | ` +
+        `${Math.round(score.pp)}pp ${
+          score.hits["0"] === 0
+            ? ""
+            : `| ${Math.round(ppFC.pp.current)}pp if FC`
+        }`
     );
   } catch (error) {
-    spinner.fail("An error occurred.");
     console.error(error);
   }
 };
