@@ -26,8 +26,8 @@ const main = async () => {
     const sort = await select({
       message: "Do you want to sort by:",
       options: [
-        { value: "recent", label: "Recent" },
-        { value: "best", label: "Best" },
+        { value: "recent", label: "Most Recent Score" },
+        { value: "best", label: "Top Play" },
       ],
     });
 
