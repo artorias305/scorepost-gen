@@ -70,7 +70,7 @@ const main = async () => {
         `(${map.metadata.creator.name}, ${starRating.stats.star.pure}*) ${score.accuracy}% ` +
         `${score.combo.max}/${map.difficulties[0].stats.combo}x ` +
         `${score.hits["0"] === 0 ? "FC" : `${score.hits["0"]}xMiss`} | ` +
-        `${Math.round(score.pp)}pp ${
+        `${Math.round(isNaN(score.pp) ? 0 : score.pp)}pp ${
           score.hits["0"] === 0
             ? ""
             : `| ${Math.round(ppFC.pp.current)}pp if FC`
