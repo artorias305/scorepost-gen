@@ -68,9 +68,14 @@ const main = async () => {
     outro(
       `${player.name} | ${map.metadata.artist.original} - ${map.metadata.title.original} [${map.difficulties[0].diff}] +${score.mods.name} ` +
         `(${map.metadata.creator.name}, ${starRating.stats.star.pure}*) ${score.accuracy}% ` +
-        `${score.combo.max}/${map.difficulties[0].stats.combo}x ` +
+        `${
+          score.hits["0"] === 0
+            ? ""
+            : `${score.combo.max}/${map.difficulties[0].stats.combo}x `
+        }` +
+        // `${score.combo.max}/${map.difficulties[0].stats.combo}x ` +
         `${score.hits["0"] === 0 ? "FC" : `${score.hits["0"]}xMiss`} | ` +
-        `${Math.round(isNaN(score.pp) ? 0 : score.pp)}pp ${
+        `${Math.round(score.pp)}pp ${
           score.hits["0"] === 0
             ? ""
             : `| ${Math.round(ppFC.pp.current)}pp if FC`
